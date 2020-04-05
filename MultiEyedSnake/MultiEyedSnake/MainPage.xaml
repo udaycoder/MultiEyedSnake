@@ -6,11 +6,12 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" HorizontalAlignment="Stretch" Margin="0,0,0,0" VerticalAlignment="Stretch">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" HorizontalAlignment="Stretch" Margin="0,0,0,0" VerticalAlignment="Stretch"
+    Height="700" Width="525">
 
     <Grid>
-        <TextBlock x:Name="GameNameMain" HorizontalAlignment="Center" Margin="0,0,0,0" Text="MultiEyedSnake" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="100dp"/>
-        <Button x:Name="EnterGameButton" Content="Start Game" HorizontalAlignment="Center" Margin="0,0,0,200" VerticalAlignment="Bottom" FontSize="70dp"/>
+        <TextBlock x:Name="GameNameMain" HorizontalAlignment="Center" Margin="0,0,0,0" Text="MultiEyedSnake" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="50dp"/>
+        <Button x:Name="EnterGameButton" Content="Start Game" HorizontalAlignment="Center" Margin="0,0,0,200" VerticalAlignment="Bottom" FontSize="50dp" Click="startGame"/>
 
     </Grid>
 </Page>

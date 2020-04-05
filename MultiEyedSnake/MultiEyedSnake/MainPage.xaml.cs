@@ -26,5 +26,13 @@ namespace MultiEyedSnake
         {
             this.InitializeComponent();
         }
+
+        private void startGame(object sender, RoutedEventArgs e)
+        {
+            Frame MainFrame = Window.Current.Content as Frame;
+            Window.Current.Content = MainFrame;
+            MainFrame.Navigate(typeof(gameBoard), e);      
+            Window.Current.Activate();
+        }
     }
 }

@@ -8,7 +8,7 @@ namespace MultiEyedSnake
 {
     class enemy : Tank
     {
-        public enemy()
+        public enemy(int boardMaxX,int boardMaxY) : base(boardMaxX,boardMaxY)
         {
             type = 1; //type of enemy
         }

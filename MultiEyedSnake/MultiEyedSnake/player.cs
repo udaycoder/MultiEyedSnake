@@ -8,9 +8,10 @@ namespace MultiEyedSnake
 {
     class player : Tank
     {
-        public player()
-        {
+        public player(int boardMaxX,int boardMaxY) : base(boardMaxX,boardMaxY)
+        { 
             type = 0; //type for player
+            setOrientation(0);
         }
 
         public override int getType()
@@ -30,11 +31,11 @@ namespace MultiEyedSnake
             }
             if (k == Windows.System.VirtualKey.Down)
             {
-                moveRight();
+                moveDown();
             }
             if (k == Windows.System.VirtualKey.Up)
             {
-                moveRight();
+                moveUp();
             }
             if (k == Windows.System.VirtualKey.Space)
             {

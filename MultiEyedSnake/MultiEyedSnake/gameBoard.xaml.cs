@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -31,16 +32,25 @@ namespace MultiEyedSnake
         int rowSize;
         int colSize;
         Dictionary<int, Rectangle> _rectDict = new Dictionary<int, Rectangle>();
+        Dictionary<String, Tank> tankDict = new Dictionary<String, Tank>();
         Rectangle rect;
-        int[,] battleGround;
+        String[,] battleGround;
         player playerTank;
         Windows.UI.Color enemyColor, playerColor, borderColor, fillColor;
+        List<enemy> enemyList;
+        int maxEnemies;
+        Random rand;
 
         public gameBoard()
         {
             rowSize = 20;
             colSize = 10;
+            maxEnemies = 4;
+            enemyList = new List<enemy>();
+
             this.InitializeComponent();
+
+            rand = new Random();
 
             //setting colors
             enemyColor = Windows.UI.Colors.Violet;
@@ -50,6 +60,7 @@ namespace MultiEyedSnake
 
 
             playerTank = new player(rowSize,colSize);
+            tankDict.Add(playerTank.getId(), playerTank);
             playerTank.setCenter(new Tuple<int, int>(rowSize / 2 - 1, colSize / 2 - 1));
 
             for (int i = 0; i < rowSize; i++)
@@ -71,10 +82,10 @@ namespace MultiEyedSnake
                 }
             }
 
-            battleGround = new int[rowSize, colSize];
+            battleGround = new String[rowSize, colSize];
             for (int i = 0; i < rowSize; i++)
                 for (int j = 0; j < colSize; j++)
-                    battleGround[i, j] = 0;
+                    battleGround[i, j] = "";
 
             startGameAsync();
         }
@@ -120,48 +131,53 @@ namespace MultiEyedSnake
         private void unrenderTank(Tank t)
         {
             int orientation = t.getOrientation();
-            colorCell(borderColor, fillColor, findPosOrient(t.getCenter(), t.getCenter(), orientation));
-            colorCell(borderColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 - 1, t.getCenter().Item2), t.getCenter(), orientation));
-            colorCell(borderColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1, t.getCenter().Item2 - 1), t.getCenter(), orientation));
-            colorCell(borderColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1, t.getCenter().Item2 + 1), t.getCenter(), orientation));
-            colorCell(borderColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 + 1, t.getCenter().Item2 - 1), t.getCenter(), orientation));
-            colorCell(borderColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 + 1, t.getCenter().Item2), t.getCenter(), orientation));
-            colorCell(borderColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 + 1, t.getCenter().Item2 + 1), t.getCenter(), orientation));
+            setBattleGroundTank(borderColor, fillColor, findPosOrient(t.getCenter(), t.getCenter(), orientation),"");
+            setBattleGroundTank(borderColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 - 1, t.getCenter().Item2), t.getCenter(), orientation),"");
+            setBattleGroundTank(borderColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1, t.getCenter().Item2 - 1), t.getCenter(), orientation),"");
+            setBattleGroundTank(borderColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1, t.getCenter().Item2 + 1), t.getCenter(), orientation),"");
+            setBattleGroundTank(borderColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 + 1, t.getCenter().Item2 - 1), t.getCenter(), orientation),"");
+            setBattleGroundTank(borderColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 + 1, t.getCenter().Item2), t.getCenter(), orientation),"");
+            setBattleGroundTank(borderColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 + 1, t.getCenter().Item2 + 1), t.getCenter(), orientation),"");
+            setBattleGroundTank(borderColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 - 1, t.getCenter().Item2 - 1), t.getCenter(), orientation), "");
+            setBattleGroundTank(borderColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 - 1, t.getCenter().Item2 + 1), t.getCenter(), orientation), "");
+        }
+
+        private void setBattleGroundTank(Windows.UI.Color border, Windows.UI.Color fill, Tuple<int,int> point,String id)
+        {
+            colorCell(border, fill, point);
+            battleGround[point.Item1, point.Item2] = id;
         }
 
         private void renderTank(Tank t)
         {
+            int orientation = t.getOrientation();
             if (t.getType() == 1)
             {
-
+                
+                setBattleGroundTank(enemyColor, enemyColor, findPosOrient(t.getCenter(), t.getCenter(), orientation),t.getId());
+                setBattleGroundTank(enemyColor, enemyColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 - 1, t.getCenter().Item2), t.getCenter(), orientation),t.getId());
+                setBattleGroundTank(enemyColor, enemyColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1, t.getCenter().Item2 - 1), t.getCenter(), orientation),t.getId());
+                setBattleGroundTank(enemyColor, enemyColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1, t.getCenter().Item2 + 1), t.getCenter(), orientation),t.getId());
+                setBattleGroundTank(enemyColor, enemyColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 + 1, t.getCenter().Item2 - 1), t.getCenter(), orientation),t.getId());
+                setBattleGroundTank(fillColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 + 1, t.getCenter().Item2), t.getCenter(), orientation),t.getId());
+                setBattleGroundTank(enemyColor, enemyColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 + 1, t.getCenter().Item2 + 1), t.getCenter(), orientation),t.getId());
+                setBattleGroundTank(fillColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 - 1, t.getCenter().Item2 - 1), t.getCenter(), orientation), t.getId());
+                setBattleGroundTank(fillColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 - 1, t.getCenter().Item2 + 1), t.getCenter(), orientation), t.getId());
             }
             else if(t.getType()==0)
             {
-                int orientation = t.getOrientation();
-                colorCell(playerColor, playerColor, findPosOrient(t.getCenter(),t.getCenter(),orientation)  );
-                colorCell(playerColor, playerColor, findPosOrient(new Tuple<int,int>(t.getCenter().Item1 - 1,t.getCenter().Item2), t.getCenter(), orientation));
-                colorCell(playerColor, playerColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1, t.getCenter().Item2-1), t.getCenter(), orientation));
-                colorCell(playerColor, playerColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1, t.getCenter().Item2+1), t.getCenter(), orientation));
-                colorCell(playerColor, playerColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 + 1, t.getCenter().Item2-1), t.getCenter(), orientation));
-                colorCell(playerColor, playerColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 + 1, t.getCenter().Item2), t.getCenter(), orientation));
-                colorCell(playerColor, playerColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 + 1, t.getCenter().Item2+1), t.getCenter(), orientation));
+                
+                setBattleGroundTank(playerColor, playerColor, findPosOrient(t.getCenter(),t.getCenter(),orientation), t.getId());
+                setBattleGroundTank(playerColor, playerColor, findPosOrient(new Tuple<int,int>(t.getCenter().Item1 - 1,t.getCenter().Item2), t.getCenter(), orientation), t.getId());
+                setBattleGroundTank(playerColor, playerColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1, t.getCenter().Item2-1), t.getCenter(), orientation), t.getId());
+                setBattleGroundTank(playerColor, playerColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1, t.getCenter().Item2+1), t.getCenter(), orientation), t.getId());
+                setBattleGroundTank(playerColor, playerColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 + 1, t.getCenter().Item2-1), t.getCenter(), orientation), t.getId());
+                setBattleGroundTank(playerColor, playerColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 + 1, t.getCenter().Item2), t.getCenter(), orientation), t.getId());
+                setBattleGroundTank(playerColor, playerColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 + 1, t.getCenter().Item2+1), t.getCenter(), orientation), t.getId());
+                setBattleGroundTank(fillColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 - 1, t.getCenter().Item2 - 1), t.getCenter(), orientation), t.getId());
+                setBattleGroundTank(fillColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 - 1, t.getCenter().Item2 + 1), t.getCenter(), orientation), t.getId());
             }
-        }
 
-        private int getSpawnPoint()  // returns a value ranging from 0 to 5 in random to denote directions starting from North edge then clockwise
-        {
-            int spawn = 0;
-            Random rand = new Random();
-            spawn = rand.Next() % 6;
-            return spawn;
-        }
-
-        private int getOrientation()  // returns a random value ranging from 0 to 4 to denote orientation of tank starting from North to clockwise
-        {
-            int orient = 0;
-            Random rand = new Random();
-            orient = rand.Next() % 4;
-            return orient;
         }
 
         private async void startGameAsync()
@@ -170,15 +186,28 @@ namespace MultiEyedSnake
             {
                 await Task.Delay(500);
                 renderTank(playerTank);
+                int numberOfEnemiesToRender = maxEnemies - enemyList.Count();
+                for(int i = 0; i < numberOfEnemiesToRender; i++)
+                {
+                    enemy newenemy = new enemy(rowSize, colSize,battleGround);
+                    renderTank(newenemy);
+                    enemyList.Add(newenemy);
+                }
+                for (int i = 0;i< enemyList.Count(); i++){
+                    unrenderTank(enemyList[i]);
+                    enemyList[i].TakeControls(battleGround);
+                    renderTank(enemyList[i]);
+                }
             }
         }
 
-        private void KeyDownHelper(object sender, KeyRoutedEventArgs e) // Control Player tank actions when user presses button 
+        private async void KeyDownHelper(object sender, KeyRoutedEventArgs e) // Control Player tank actions when user presses button 
         {
             unrenderTank(playerTank);
-            playerTank.TakeControls(e.Key);
+            playerTank.TakeControls(e.Key,battleGround);
             renderTank(playerTank);
-            
+            await Task.Delay(500);
+
         }
     }
 }

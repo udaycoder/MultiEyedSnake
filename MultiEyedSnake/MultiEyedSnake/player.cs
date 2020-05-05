@@ -19,31 +19,31 @@ namespace MultiEyedSnake
             return type;
         }
 
-        public void TakeControls(Windows.System.VirtualKey k, String[,] board)
+        public void TakeControls(Windows.System.VirtualKey k, ref String[,] board)
         {
             if (k == Windows.System.VirtualKey.Left)
             {
-                moveLeft(board);
+                moveLeft(ref board);
             }
             if (k == Windows.System.VirtualKey.Right)
             {
-                moveRight(board);
+                moveRight(ref board);
             }
             if (k == Windows.System.VirtualKey.Down)
             {
-                moveDown(board);
+                moveDown(ref board);
             }
             if (k == Windows.System.VirtualKey.Up)
             {
-                moveUp(board);
+                moveUp(ref board);
             }
-            if (k == Windows.System.VirtualKey.Space)
+            if (k == Windows.System.VirtualKey.Control)
             {
                 shoot();
             }
         }
 
-        public override void TakeControls(String[,] board)
+        public override void TakeControls(ref String[,] board)
         {
             
         }

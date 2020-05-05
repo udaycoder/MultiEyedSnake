@@ -109,7 +109,7 @@ namespace MultiEyedSnake
             return new Tuple<int, int>(x, y);
         }
 
-        protected bool isBlank(Tuple<int,int> point,String[,] board)
+        protected bool isBlank(Tuple<int,int> point,ref String[,] board)
         {
             int x = point.Item1;
             int y = point.Item2;
@@ -119,64 +119,64 @@ namespace MultiEyedSnake
                 return false;
         }
 
-        protected bool isfullTankValid(Tuple<int,int> center,String[,] board)
+        protected bool isfullTankValid(Tuple<int,int> center,ref String[,] board)
         {
-            if (isBlank(findPosOrient(new Tuple<int, int>(center.Item1 - 1, center.Item2), center, orientation),board)
-                && isBlank(findPosOrient(new Tuple<int, int>(center.Item1, center.Item2-1), center, orientation), board)
-                && isBlank(findPosOrient(new Tuple<int, int>(center.Item1, center.Item2), center, orientation), board)
-                && isBlank(findPosOrient(new Tuple<int, int>(center.Item1, center.Item2 + 1), center, orientation), board)
-                && isBlank(findPosOrient(new Tuple<int, int>(center.Item1+1, center.Item2 - 1), center, orientation), board)
-                && isBlank(findPosOrient(new Tuple<int, int>(center.Item1+1, center.Item2), center, orientation), board)
-                && isBlank(findPosOrient(new Tuple<int, int>(center.Item1+1, center.Item2 + 1), center, orientation), board)
-                && isBlank(findPosOrient(new Tuple<int, int>(center.Item1 - 1, center.Item2 - 1), center, orientation), board)
-                && isBlank(findPosOrient(new Tuple<int, int>(center.Item1 - 1, center.Item2 + 1), center, orientation), board)
+            if (isBlank(findPosOrient(new Tuple<int, int>(center.Item1 - 1, center.Item2), center, orientation),ref board)
+                && isBlank(findPosOrient(new Tuple<int, int>(center.Item1, center.Item2-1), center, orientation), ref board)
+                && isBlank(findPosOrient(new Tuple<int, int>(center.Item1, center.Item2), center, orientation), ref board)
+                && isBlank(findPosOrient(new Tuple<int, int>(center.Item1, center.Item2 + 1), center, orientation), ref board)
+                && isBlank(findPosOrient(new Tuple<int, int>(center.Item1+1, center.Item2 - 1), center, orientation), ref board)
+                && isBlank(findPosOrient(new Tuple<int, int>(center.Item1+1, center.Item2), center, orientation), ref board)
+                && isBlank(findPosOrient(new Tuple<int, int>(center.Item1+1, center.Item2 + 1), center, orientation),ref board)
+                && isBlank(findPosOrient(new Tuple<int, int>(center.Item1 - 1, center.Item2 - 1), center, orientation),ref board)
+                && isBlank(findPosOrient(new Tuple<int, int>(center.Item1 - 1, center.Item2 + 1), center, orientation),ref board)
                 )
                 return true;
             else
                 return false;
         }
 
-        private bool IsValidPos(int x, int y, String[,] board)
+        private bool IsValidPos(int x, int y, ref String[,] board)
         {
-            if (x >= minX && x <= maxX && y >= minY && y <= maxY && isfullTankValid(new Tuple<int,int>(x,y),board))
+            if (x >= minX && x <= maxX && y >= minY && y <= maxY && isfullTankValid(new Tuple<int,int>(x,y),ref board))
                 return true;
             else
                 return false;
         }
 
-        public void moveLeft(String[,] board)
+        public void moveLeft(ref String[,] board)
         {
-            if (orientation == 3 && IsValidPos(center.Item1, center.Item2 - 1,board))
+            if (orientation == 3 && IsValidPos(center.Item1, center.Item2 - 1,ref board))
                 center = new Tuple<int,int>(center.Item1,center.Item2-1);
             else
                 setOrientation(3);
         }
 
-        public void moveRight(String[,] board)
+        public void moveRight(ref String[,] board)
         {
-            if (orientation == 1 && IsValidPos(center.Item1, center.Item2 + 1,board))
+            if (orientation == 1 && IsValidPos(center.Item1, center.Item2 + 1,ref board))
                 center = new Tuple<int, int>(center.Item1, center.Item2 + 1);
             else
                 setOrientation(1);
         }
 
-        public void moveUp(String[,] board)
+        public void moveUp(ref String[,] board)
         {
-            if (orientation == 0 && IsValidPos(center.Item1 - 1, center.Item2,board))
+            if (orientation == 0 && IsValidPos(center.Item1 - 1, center.Item2,ref board))
                 center = new Tuple<int, int>(center.Item1 - 1, center.Item2);
             else
                 setOrientation(0);
         }
 
-        public void moveDown(String[,] board)
+        public void moveDown(ref String[,] board)
         {
-            if (orientation == 2 && IsValidPos(center.Item1 + 1, center.Item2,board))
+            if (orientation == 2 && IsValidPos(center.Item1 + 1, center.Item2,ref board))
                 center = new Tuple<int, int>(center.Item1 + 1, center.Item2);
             else
                 setOrientation(2);
         }
 
-        public abstract void TakeControls(String[,] board);
+        public abstract void TakeControls(ref String[,] board);
         public abstract int getType();
     }
 }

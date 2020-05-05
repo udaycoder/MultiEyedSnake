@@ -119,6 +119,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="cannon.cs" />
     <Compile Include="enemy.cs" />
     <Compile Include="gameBoard.xaml.cs">
       <DependentUpon>gameBoard.xaml</DependentUpon>

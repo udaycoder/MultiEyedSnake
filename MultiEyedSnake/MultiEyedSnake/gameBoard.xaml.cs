@@ -38,6 +38,7 @@ namespace MultiEyedSnake
         player playerTank;
         Windows.UI.Color enemyColor, playerColor, borderColor, fillColor;
         List<enemy> enemyList;
+        List<cannon> cannonList;
         int maxEnemies;
         Random rand;
 
@@ -47,13 +48,14 @@ namespace MultiEyedSnake
             colSize = 10;
             maxEnemies = 4;
             enemyList = new List<enemy>();
+            cannonList = new List<cannon>();
 
             this.InitializeComponent();
 
             rand = new Random();
 
             //setting colors
-            enemyColor = Windows.UI.Colors.Violet;
+            enemyColor = Windows.UI.Colors.Navy;
             playerColor = Windows.UI.Colors.Green;
             borderColor = Windows.UI.Colors.Red;
             fillColor = Windows.UI.Colors.Black;
@@ -140,12 +142,40 @@ namespace MultiEyedSnake
             setBattleGroundTank(borderColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 + 1, t.getCenter().Item2 + 1), t.getCenter(), orientation),"");
             setBattleGroundTank(borderColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 - 1, t.getCenter().Item2 - 1), t.getCenter(), orientation), "");
             setBattleGroundTank(borderColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 - 1, t.getCenter().Item2 + 1), t.getCenter(), orientation), "");
+            tankDict.Remove(t.getId());
+            t = null;
         }
+
 
         private void setBattleGroundTank(Windows.UI.Color border, Windows.UI.Color fill, Tuple<int,int> point,String id)
         {
             colorCell(border, fill, point);
             battleGround[point.Item1, point.Item2] = id;
+        }
+
+        private void renderShot(cannon c)
+        {
+            colorCell(Windows.UI.Colors.Gray, Windows.UI.Colors.Gray, c.getPos());
+            if(battleGround[c.getPos().Item1, c.getPos().Item2] != "")
+            {
+                if(battleGround[c.getPos().Item1, c.getPos().Item2] != "3")
+                {
+                    tankDict[battleGround[c.getPos().Item1, c.getPos().Item2]].setAlive(false);
+                    unrenderTank(tankDict[battleGround[c.getPos().Item1, c.getPos().Item2]]);
+                }
+                unrenderShot(c);
+                c.setAlive(false);
+            }
+            else
+            {
+                battleGround[c.getPos().Item1, c.getPos().Item2] = c.getType().ToString();
+            }
+        }
+
+        private void unrenderShot(cannon c)
+        {
+            colorCell(borderColor, fillColor, c.getPos());
+            battleGround[c.getPos().Item1, c.getPos().Item2] = "";
         }
 
         private void renderTank(Tank t)
@@ -177,6 +207,8 @@ namespace MultiEyedSnake
                 setBattleGroundTank(fillColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 - 1, t.getCenter().Item2 - 1), t.getCenter(), orientation), t.getId());
                 setBattleGroundTank(fillColor, fillColor, findPosOrient(new Tuple<int, int>(t.getCenter().Item1 - 1, t.getCenter().Item2 + 1), t.getCenter(), orientation), t.getId());
             }
+            tankDict[t.getId()] = t;
+            t = null;
 
         }
 
@@ -185,18 +217,77 @@ namespace MultiEyedSnake
             while (playerTank.isAlive())
             {
                 await Task.Delay(500);
+                int canCount = 0;
+                canCount = cannonList.Count();
+                for(int i = 0; i < canCount; i++)
+                {
+                    if(cannonList[i].getPos().Item1<0 || cannonList[i].getPos().Item1>= rowSize || cannonList[i].getPos().Item2 < 0 || cannonList[i].getPos().Item2 >= colSize)
+                    {
+                        cannonList[i].setAlive(false);
+                        cannonList.Remove(cannonList[i]);
+                        i--;
+                        canCount = cannonList.Count();
+                        continue;
+                    }
+                    if (cannonList[i].getAlive())
+                    {
+                        unrenderShot(cannonList[i]);
+                        cannonList[i].nextPos();
+                        if (cannonList[i].getPos().Item1 >= 0 && cannonList[i].getPos().Item1 < rowSize && cannonList[i].getPos().Item2 >= 0 && cannonList[i].getPos().Item2 < colSize)
+                            renderShot(cannonList[i]);
+                    }
+                    else
+                    {
+                        unrenderShot(cannonList[i]);
+                        cannonList.Remove(cannonList[i]);
+                        i--;
+                        canCount = cannonList.Count();
+                        continue;
+                    }
+                }
                 renderTank(playerTank);
                 int numberOfEnemiesToRender = maxEnemies - enemyList.Count();
-                for(int i = 0; i < numberOfEnemiesToRender; i++)
+                for (int i = 0; i < numberOfEnemiesToRender; i++)
                 {
-                    enemy newenemy = new enemy(rowSize, colSize,battleGround);
+                    enemy newenemy = new enemy(rowSize, colSize, ref battleGround);
                     renderTank(newenemy);
                     enemyList.Add(newenemy);
                 }
-                for (int i = 0;i< enemyList.Count(); i++){
-                    unrenderTank(enemyList[i]);
-                    enemyList[i].TakeControls(battleGround);
-                    renderTank(enemyList[i]);
+                int listOfEnemies = enemyList.Count();
+                for (int i = 0; i < listOfEnemies; i++)
+                {
+                    if (enemyList[i].isAlive())
+                    {
+                        unrenderTank(enemyList[i]);
+                        enemyList[i].TakeControls(ref battleGround);
+                        if (enemyList[i].getReadyToFire())
+                        {
+                            cannon shot = new cannon(enemyList[i].getOrientation(), enemyList[i].getCenter());
+                            if (shot.getPos().Item1 >= 0 && shot.getPos().Item1 < rowSize && shot.getPos().Item2 >= 0 && shot.getPos().Item2 < colSize)
+                            {
+                                cannonList.Add(shot);
+                                renderShot(shot);
+                            }
+                            enemyList[i].setReadyToFire(false);
+                        }
+                        renderTank(enemyList[i]);
+                    }
+                    else
+                    {
+                        enemyList.Remove(enemyList[i]);
+                        i--;
+                        listOfEnemies = enemyList.Count();
+                        continue;
+                    }
+                }
+            }
+
+            //Game Over Phase
+            for (int i = 0; i < rowSize; i++)
+            {
+                for (int j = 0; j < colSize; j++)
+                {
+                    colorCell(borderColor, fillColor, new Tuple<int, int>(i, j));
                 }
             }
         }
@@ -204,7 +295,17 @@ namespace MultiEyedSnake
         private async void KeyDownHelper(object sender, KeyRoutedEventArgs e) // Control Player tank actions when user presses button 
         {
             unrenderTank(playerTank);
-            playerTank.TakeControls(e.Key,battleGround);
+            playerTank.TakeControls(e.Key,ref battleGround);
+            if (playerTank.getReadyToFire())
+            {
+                cannon shot = new cannon(playerTank.getOrientation(), playerTank.getCenter());
+                if (shot.getPos().Item1 >= 0 && shot.getPos().Item1 < rowSize && shot.getPos().Item2 >= 0 && shot.getPos().Item2 < colSize)
+                {
+                    cannonList.Add(shot);
+                    renderShot(shot);
+                }
+                playerTank.setReadyToFire(false);
+            }
             renderTank(playerTank);
             await Task.Delay(500);
 

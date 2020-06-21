@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.System;
+using Windows.System.Threading;
 using Windows.UI.Core;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
@@ -41,9 +43,11 @@ namespace MultiEyedSnake
         List<cannon> cannonList;
         int maxEnemies;
         Random rand;
+        int score;
 
         public gameBoard()
         {
+            score = 0;
             rowSize = 20;
             colSize = 10;
             maxEnemies = 4;
@@ -53,6 +57,8 @@ namespace MultiEyedSnake
             this.InitializeComponent();
 
             rand = new Random();
+
+            Score_Value.Text = " " + Convert.ToString(score);
 
             //setting colors
             enemyColor = Windows.UI.Colors.Navy;
@@ -162,13 +168,19 @@ namespace MultiEyedSnake
                 {
                     tankDict[battleGround[c.getPos().Item1, c.getPos().Item2]].setAlive(false);
                     unrenderTank(tankDict[battleGround[c.getPos().Item1, c.getPos().Item2]]);
+                    if(c.getLaunchedBy()==0)
+                    {
+                        score += 10;  //palyer score logic
+                        Score_Value.Text = " " + Convert.ToString(score);
+                    }
                 }
                 unrenderShot(c);
                 c.setAlive(false);
             }
             else
             {
-                battleGround[c.getPos().Item1, c.getPos().Item2] = c.getType().ToString();
+                battleGround[c.getPos().Item1, c.getPos().Item2] = c.getType().ToString();   // using type in battleground for cannon and not id like in tanks,
+                                                                                             // helps in logic also there is not need for id here
             }
         }
 
@@ -263,6 +275,7 @@ namespace MultiEyedSnake
                         if (enemyList[i].getReadyToFire())
                         {
                             cannon shot = new cannon(enemyList[i].getOrientation(), enemyList[i].getCenter());
+                            shot.setLaunchedBy(1);
                             if (shot.getPos().Item1 >= 0 && shot.getPos().Item1 < rowSize && shot.getPos().Item2 >= 0 && shot.getPos().Item2 < colSize)
                             {
                                 cannonList.Add(shot);
@@ -283,12 +296,36 @@ namespace MultiEyedSnake
             }
 
             //Game Over Phase
+            CleanUpBoard();
+        }
+
+        private void CleanUpBoard()
+        {
             for (int i = 0; i < rowSize; i++)
             {
                 for (int j = 0; j < colSize; j++)
                 {
                     colorCell(borderColor, fillColor, new Tuple<int, int>(i, j));
+                    battleGround[i, j] = "";
                 }
+            }
+
+            cannonList.Clear();
+            enemyList.Clear();
+            tankDict.Clear();
+            score = 0;
+        }
+
+        private void resetGame(object sender, RoutedEventArgs e)
+        {
+            if (!playerTank.isAlive())   // Currently can only reset game while game is not active
+            {
+                CleanUpBoard();
+                playerTank = null;
+                Frame MainFrame = Window.Current.Content as Frame;
+                Window.Current.Content = MainFrame;
+                MainFrame.Navigate(typeof(MainPage), e);
+                Window.Current.Activate();
             }
         }
 
@@ -299,6 +336,7 @@ namespace MultiEyedSnake
             if (playerTank.getReadyToFire())
             {
                 cannon shot = new cannon(playerTank.getOrientation(), playerTank.getCenter());
+                shot.setLaunchedBy(0);
                 if (shot.getPos().Item1 >= 0 && shot.getPos().Item1 < rowSize && shot.getPos().Item2 >= 0 && shot.getPos().Item2 < colSize)
                 {
                     cannonList.Add(shot);

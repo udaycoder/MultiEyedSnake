@@ -11,6 +11,7 @@ namespace MultiEyedSnake
         private Tuple<int, int> pos;
         private bool isAlive;
         private int orientation;
+        private int launchedBy; // to store whether this is a cannon launched by player tank(0) or enemy tank(1)
         protected int type;
         protected String id;
         public cannon(int orient, Tuple<int, int> tankCenter)
@@ -35,6 +36,16 @@ namespace MultiEyedSnake
                 pos = new Tuple<int, int>(tankCenter.Item1, tankCenter.Item2 - 2);
             }
             isAlive = true;
+        }
+
+        public int getLaunchedBy()
+        {
+            return launchedBy;
+        }
+
+        public void setLaunchedBy(int t)
+        {
+            launchedBy = t;
         }
 
         public String getId()

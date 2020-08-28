@@ -67,7 +67,8 @@ namespace MultiEyedSnake
             fillColor = Windows.UI.Colors.Black;
 
 
-            playerTank = new player(rowSize,colSize);
+            playerTank = MultiEyedSnake.player.get_instance(rowSize, colSize);
+            playerTank.setAlive(true);
             tankDict.Add(playerTank.getId(), playerTank);
             playerTank.setCenter(new Tuple<int, int>(rowSize / 2 - 1, colSize / 2 - 1));
 

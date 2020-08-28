@@ -8,10 +8,20 @@ namespace MultiEyedSnake
 {
     class player : Tank
     {
-        public player(int boardMaxX,int boardMaxY) : base(boardMaxX,boardMaxY)
+        private static player singleton_player;
+        private player(int boardMaxX,int boardMaxY) : base(boardMaxX,boardMaxY)
         { 
             type = 0; //type for player
             setOrientation(0);
+        }
+
+        public static player get_instance(int rowSize,int colSize)
+        {
+            if(singleton_player==null)
+            {
+                singleton_player = new player(rowSize, colSize);
+            }
+            return singleton_player;
         }
 
         public override int getType()
